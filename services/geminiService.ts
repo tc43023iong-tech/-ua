@@ -1,8 +1,15 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { Question, QuestionType, TARGET_RHYMES } from "../types";
 
-// Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Lazy Initialize Gemini Client
+let ai: GoogleGenAI | null = null;
+
+const getAi = () => {
+    if (!ai) {
+        ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    }
+    return ai;
+};
 
 // --- DATASET: Single characters only to ensure strict Initial + Rhyme logic ---
 const WORD_BANK: Record<string, { char: string; pinyin: string; mean: string }[]> = {
@@ -152,7 +159,8 @@ export const generateGameContent = async (count: number = 8): Promise<Question[]
 
 export const generateSpeech = async (text: string): Promise<string | null> => {
   try {
-    const response = await ai.models.generateContent({
+    const aiInstance = getAi();
+    const response = await aiInstance.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text: text }] }],
       config: {
