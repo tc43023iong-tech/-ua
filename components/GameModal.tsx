@@ -21,9 +21,10 @@ const GameModal: React.FC<GameModalProps> = ({ question, onAnswer }) => {
     setHasSubmitted(true);
 
     // Proceed to next level even if wrong, after delay
+    // Increased delay to 3.5s to allow reading the big explanation
     setTimeout(() => {
       onAnswer(correct);
-    }, 2500); 
+    }, 3500); 
   };
 
   return (
@@ -122,62 +123,72 @@ const GameModal: React.FC<GameModalProps> = ({ question, onAnswer }) => {
 
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100 z-40">
         
-        {/* Header */}
-        <div className={`p-4 text-center relative transition-colors ${hasSubmitted ? (isCorrect ? 'bg-green-400' : 'bg-orange-300') : 'bg-amber-300'}`}>
+        {/* Header - Always visible but changes style */}
+        <div className={`p-4 text-center relative transition-colors duration-500 ${hasSubmitted ? (isCorrect ? 'bg-green-500' : 'bg-red-400') : 'bg-amber-300'}`}>
           <h2 className={`text-2xl font-black tracking-wide ${hasSubmitted ? 'text-white' : 'text-amber-900'}`}>
              {hasSubmitted ? (isCorrect ? "🎉 答對了！" : "💪 加油！") : "⭐ 挑戰時間"}
           </h2>
         </div>
 
-        {/* Content */}
-        <div className="p-6 flex flex-col items-center gap-6">
+        {/* Main Content Area */}
+        <div className="p-8 min-h-[400px] flex flex-col items-center justify-center">
           
-          <div className="text-5xl font-black text-gray-800 text-center py-6 leading-relaxed tracking-wider">
-            {question.promptText}
-          </div>
+          {!hasSubmitted ? (
+            /* QUESTION VIEW */
+            <div className="flex flex-col items-center gap-8 w-full animate-in fade-in zoom-in-95 duration-300">
+                <div className="text-6xl font-black text-gray-800 text-center leading-relaxed tracking-wider py-4">
+                    {question.promptText}
+                </div>
 
-          {/* Options Grid */}
-          <div className="grid grid-cols-4 gap-3 w-full">
-            {question.options.map((option, idx) => {
-              let btnClass = "bg-sky-50 hover:bg-sky-100 text-sky-800 border-2 border-sky-100 shadow-[0_4px_0_0_rgba(186,230,253,1)] hover:shadow-[0_2px_0_0_rgba(186,230,253,1)] hover:translate-y-[2px]";
-              
-              if (hasSubmitted) {
-                if (option === question.correctAnswer) {
-                  // Correct answer always Green
-                  btnClass = "bg-green-100 border-green-500 text-green-700 shadow-none translate-y-[4px]";
-                } else if (option === selected && option !== question.correctAnswer) {
-                  // Wrong selected answer Red
-                  btnClass = "bg-red-100 border-red-400 text-red-700 shadow-none translate-y-[4px]";
-                } else {
-                  btnClass = "opacity-50 bg-gray-50 border-gray-100 shadow-none";
-                }
-              } else if (selected === option) {
-                btnClass = "bg-sky-200 border-sky-400 text-sky-900";
-              }
+                {/* Options Grid */}
+                <div className="grid grid-cols-4 gap-4 w-full">
+                    {question.options.map((option, idx) => {
+                    let btnClass = "bg-sky-50 hover:bg-sky-100 text-sky-800 border-2 border-sky-100 shadow-[0_4px_0_0_rgba(186,230,253,1)] hover:shadow-[0_2px_0_0_rgba(186,230,253,1)] hover:translate-y-[2px]";
+                    
+                    if (selected === option) {
+                        btnClass = "bg-sky-200 border-sky-400 text-sky-900";
+                    }
 
-              return (
-                <button
-                  key={idx}
-                  onClick={() => handleCheck(option)}
-                  disabled={hasSubmitted}
-                  className={`p-3 rounded-xl text-xl md:text-2xl font-bold transition-all duration-100 active:shadow-none active:translate-y-[4px] ${btnClass}`}
-                >
-                  {option}
-                </button>
-              );
-            })}
-          </div>
+                    return (
+                        <button
+                        key={idx}
+                        onClick={() => handleCheck(option)}
+                        className={`p-4 rounded-xl text-3xl font-bold transition-all duration-100 active:shadow-none active:translate-y-[4px] ${btnClass}`}
+                        >
+                        {option}
+                        </button>
+                    );
+                    })}
+                </div>
+            </div>
+          ) : (
+            /* FEEDBACK VIEW - CENTERED & BIG */
+            <div className="flex flex-col items-center justify-center gap-6 w-full animate-in zoom-in-75 duration-500">
+                {isCorrect ? (
+                    <div className="flex flex-col items-center gap-2">
+                        <CheckCircle className="w-32 h-32 text-green-500 animate-bounce" strokeWidth={2.5} />
+                        <h3 className="text-5xl font-black text-green-600 tracking-widest mt-2">太棒了！</h3>
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center gap-2">
+                         <XCircle className="w-32 h-32 text-red-500" strokeWidth={2.5} />
+                         <div className="text-center">
+                            <h3 className="text-5xl font-black text-red-500 mb-2">哎呀！</h3>
+                            <p className="text-2xl font-bold text-gray-400">正確答案是...</p>
+                         </div>
+                    </div>
+                )}
 
-          {/* Feedback */}
-          {hasSubmitted && (
-            <div className={`mt-4 w-full p-3 rounded-xl flex flex-col items-center text-center animate-in fade-in slide-in-from-bottom-2 ${isCorrect ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'}`}>
-              <div className="flex items-center gap-2 text-xl font-black mb-1">
-                {isCorrect ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
-                <span>{isCorrect ? "太棒了！" : "哎呀！正確答案是..."}</span>
-              </div>
-              {question.explanation && <p className="text-sm opacity-90">{question.explanation}</p>}
+                {/* Big Explanation Box */}
+                <div className="bg-yellow-50 border-4 border-yellow-400 p-8 rounded-3xl shadow-xl mt-4 w-full text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-yellow-200"></div>
+                    <p className="text-4xl font-black text-gray-800 leading-normal">
+                        {question.explanation}
+                    </p>
+                </div>
             </div>
           )}
+
         </div>
       </div>
     </div>
