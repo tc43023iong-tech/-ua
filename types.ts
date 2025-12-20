@@ -1,3 +1,11 @@
+
+export enum GameMode {
+  MENU = 'MENU',
+  RIVER = 'RIVER',
+  COOKING = 'COOKING',
+  TWISTERS = 'TWISTERS'
+}
+
 export enum GameState {
   START = 'START',
   PLAYING = 'PLAYING',
@@ -10,23 +18,31 @@ export type PinyinRhyme = 'ua' | 'uo' | 'uai' | 'uei' | 'uan' | 'uen' | 'uang' |
 export const TARGET_RHYMES: PinyinRhyme[] = ['ua', 'uo', 'uai', 'uei', 'uan', 'uen', 'uang', 'ueng'];
 
 export enum QuestionType {
-  MATCHING = 'MATCHING',   // See character/word, pick pinyin
-  FILL_BLANK = 'FILL_BLANK' // See incomplete pinyin, pick rhyme
+  MATCHING = 'MATCHING',
+  FILL_BLANK = 'FILL_BLANK',
+  TWISTER = 'TWISTER'
 }
 
 export interface Question {
   id: string;
   type: QuestionType;
   rhyme: PinyinRhyme;
-  promptText: string; // The character or question text
-  audioText?: string; // Text to be spoken by TTS (optional for feedback now)
-  options: string[]; // 3-4 options
+  promptText: string;
+  options: string[];
   correctAnswer: string;
   explanation?: string;
+  itemImage?: string; // For cooking mode
 }
 
 export interface Level {
   id: number;
   question: Question;
   isCompleted: boolean;
+}
+
+export interface TongueTwister {
+  id: number;
+  text: string;
+  focusRhyme: PinyinRhyme;
+  translation: string;
 }
